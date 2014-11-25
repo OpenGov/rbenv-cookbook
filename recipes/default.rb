@@ -19,9 +19,10 @@
 # limitations under the License.
 #
 
-node.set[:rbenv][:root]          = rbenv_root_path
-node.set[:ruby_build][:prefix]   = "#{node[:rbenv][:root]}/plugins/ruby_build"
-node.set[:ruby_build][:bin_path] = "#{node[:ruby_build][:prefix]}/bin"
+node.set[:rbenv][:root]             = rbenv_root_path
+node.set[:ruby_build][:plugin_path] = "#{node[:rbenv][:root]}/plugins"
+node.set[:ruby_build][:prefix]      = "#{node[:ruby_build][:plugin_path]}/ruby_build"
+node.set[:ruby_build][:bin_path]    = "#{node[:ruby_build][:prefix]}/bin"
 
 case node[:platform]
 when "ubuntu", "debian"
@@ -93,17 +94,35 @@ directory node[:rbenv][:root] do
 end
 
 with_home_for_user(node[:rbenv][:user]) do
+  if node[:rbenv][:install_type] == 'tarball'
+    rbenv_cache_path = "#{Chef::Config[:file_cache_path]}/rbenv-#{node['rbenv']['tarball_name']}"
 
-  git node[:rbenv][:root] do
-    repository node[:rbenv][:git_repository]
-    reference node[:rbenv][:git_revision]
-    user node[:rbenv][:user]
-    group node[:rbenv][:group]
-    action :sync
+    tar_extract node['rbenv']['tarball_url'] do
+      user node['rbenv']['user']
+      group node['rbenv']['group']
+      download_dir rbenv_cache_path
+      target_dir node['rbenv']['install_prefix']
+      compress_char node['rbenv']['tar_compression_char']
+      creates node['rbenv']['root']
+      notifies :run, 'execute[og-rbenv-chown-rbenv-package]', :immediately
+      notifies :create, "template[/etc/profile.d/rbenv.sh]", :immediately
+    end
 
-    notifies :create, "template[/etc/profile.d/rbenv.sh]", :immediately
+    execute 'rbenv-chown-rbenv-package' do
+      command "chown -R #{node['rbenv']['user']}:#{node['rbenv']['group']} #{node['rbenv']['root']}"
+      action :nothing
+    end
+  else
+
+    git node[:rbenv][:root] do
+      repository node[:rbenv][:git_repository]
+      reference node[:rbenv][:git_revision]
+      user node[:rbenv][:user]
+      group node[:rbenv][:group]
+      action :sync
+      notifies :create, "template[/etc/profile.d/rbenv.sh]", :immediately
+    end
   end
-
 end
 
 template "/etc/profile.d/rbenv.sh" do

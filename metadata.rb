@@ -3,7 +3,7 @@ maintainer       "Riot Games"
 maintainer_email "jamie@vialstudios.com"
 license          "Apache 2.0"
 description      "Installs and configures rbenv"
-version          "1.8.0"
+version          "1.8.50"
 
 recipe "rbenv", "Installs and configures rbenv"
 recipe "rbenv::ruby_build", "Installs and configures ruby_build"
@@ -14,7 +14,7 @@ recipe "rbenv::rbenv_vars", "Installs an rbenv plugin rbenv-vars that lets you s
   supports os
 end
 
-%w{ git build-essential apt }.each do |cb|
+%w{ git build-essential apt tar}.each do |cb|
   depends cb
 end
 
