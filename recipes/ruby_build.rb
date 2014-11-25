@@ -22,13 +22,31 @@
 include_recipe "git"
 
 with_home_for_user(node[:rbenv][:user]) do
+  if node[:ruby_build][:install_type] == 'tarball'
+    rbenv_build_cache_path = "#{Chef::Config[:file_cache_path]}/rbenv-ruby-build-#{node['ruby_build']['tarball_name']}"
 
-  git node[:ruby_build][:prefix] do
-    repository node[:ruby_build][:git_repository]
-    reference node[:ruby_build][:git_revision]
-    action :sync
-    user node[:rbenv][:user]
-    group node[:rbenv][:group]
+    tar_extract node['ruby_build']['tarball_url'] do
+      user node['rbenv']['user']
+      group node['rbenv']['group']
+      download_dir rbenv_build_cache_path
+      target_dir node['ruby_build']['plugin_path']
+      compress_char node['ruby_build']['tar_compression_char']
+      creates node['ruby_build']['prefix']
+      notifies :run, 'execute[rbenv-chown-build-package]', :immediately
+    end
+
+    execute 'rbenv-chown-build-package' do
+      command "chown -R #{node['rbenv']['user']}:#{node['rbenv']['group']} #{node['ruby_build']['prefix']}"
+      action :nothing
+    end
+  else
+
+    git node[:ruby_build][:prefix] do
+      repository node[:ruby_build][:git_repository]
+      reference node[:ruby_build][:git_revision]
+      action :sync
+      user node[:rbenv][:user]
+      group node[:rbenv][:group]
+    end
   end
-
 end
