@@ -56,7 +56,7 @@ default[:ruby_build][:tarball_extension] = 'tar.bz2'
 default[:ruby_build][:tar_compression_char] = 'j'
 
 if node[:ruby_build][:tarball_url_prefix] && node[:ruby_build][:tarball_version]
-  default[:ruby_build][:tarball_name] = "{node[:ruby_build][:tarball_version]}.#{node[:ruby_build][:tarball_extension]}"
+  default[:ruby_build][:tarball_name] = "#{node[:ruby_build][:tarball_version]}.#{node[:ruby_build][:tarball_extension]}"
   default[:ruby_build][:tarball_url] = "#{node[:ruby_build][:tarball_url_prefix]}-#{node[:ruby_build][:tarball_name]}"
 end
 
