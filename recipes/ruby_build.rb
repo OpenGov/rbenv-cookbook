@@ -32,7 +32,7 @@ with_home_for_user(node[:rbenv][:user]) do
       target_dir node['ruby_build']['plugin_path']
       compress_char node['ruby_build']['tar_compression_char']
       creates node['ruby_build']['prefix']
-      notifies :run, 'execute[og-rbenv-chown-build-package]', :immediately
+      notifies :run, 'execute[rbenv-chown-build-package]', :immediately
     end
 
     execute 'rbenv-chown-build-package' do

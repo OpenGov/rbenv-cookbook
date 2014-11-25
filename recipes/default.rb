@@ -103,8 +103,8 @@ with_home_for_user(node[:rbenv][:user]) do
       download_dir rbenv_cache_path
       target_dir node['rbenv']['install_prefix']
       compress_char node['rbenv']['tar_compression_char']
-      creates node['rbenv']['root']
-      notifies :run, 'execute[og-rbenv-chown-rbenv-package]', :immediately
+      creates File.join(node['rbenv']['root'], 'README.md')
+      notifies :run, 'execute[rbenv-chown-rbenv-package]', :immediately
       notifies :create, "template[/etc/profile.d/rbenv.sh]", :immediately
     end
 
