@@ -26,6 +26,7 @@ attribute :ruby_version, :kind_of => String
 attribute :force,        :default => false
 attribute :global,       :default => false
 attribute :patch,        :default => nil
+attribute :build_envs,   :kind_of => Hash, :default => {}
 
 def initialize(*args)
   super
