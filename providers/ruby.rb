@@ -28,10 +28,12 @@ action :install do
   else
     Chef::Log.info "#{resource_descriptor} is building, this may take a while..."
 
+    # We need to do the JSON conversion dance because chef hashes are really mashes
+    build_envs = Chef::JSONCompat.from_json(new_resource.build_envs.to_json)
     start_time = Time.now
     out = new_resource.patch ?
-      rbenv_command("install --patch #{new_resource.ruby_version}", patch: new_resource.patch) :
-      rbenv_command("install #{new_resource.ruby_version}")
+      rbenv_command("install --patch #{new_resource.ruby_version}", patch: new_resource.patch, env: build_envs) :
+      rbenv_command("install #{new_resource.ruby_version}", env: build_envs)
 
     unless out.exitstatus == 0
       raise Chef::Exceptions::ShellCommandFailed, "\n" + out.format_for_exception
